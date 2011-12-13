@@ -6,8 +6,9 @@
 
 <div style="float:right">
 <cfchart chartheight="300" chartwidth="400">
-	<cfchartseries type="pie" query="qStatuses" itemcolumn="status" valuecolumn="NumRules" colorlist="#ValueList(qStatuses.color)#" >
+	<cfchartseries type="pie" query="qStatuses" itemcolumn="status" valuecolumn="NumRules" colorlist="#ValueList(qStatuses.color)#">
 </cfchart>
+<p><b>Percent Passed:</b> <cfoutput>#PercentPassed#%</cfoutput></p>
 </div>
 
 <cf_sebForm sendForward="false" method="get">

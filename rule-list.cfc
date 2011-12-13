@@ -27,6 +27,7 @@
 	
 	<cfset vars.qRules = Variables.Rules.getRules(ArgumentCollection=vars.sRules)>
 	<cfset vars.qStatuses = getStatuses(vars.qRules)>
+	<cfset vars.PercentPassed = getPercentPassed(vars.qStatuses)>
 	
 	<cfset vars.SebTableAttributes.isAddable = false>
 	<cfset vars.SebTableAttributes.isEditable = false>
@@ -35,6 +36,26 @@
 	<cfset vars.SebTableAttributes.editpage = "rule-edit.cfm?&component=#URL.component#">
 	
 	<cfreturn vars>
+</cffunction>
+
+<cffunction name="getPercentPassed" access="public" returntype="numeric" output="no">
+	<cfargument name="qStatuses" type="query" required="yes">
+	
+	<cfset var result = 0>
+	<cfset var sValues = StructNew()>
+	<cfset var total = 0>
+	
+	<cfif Arguments.qStatuses.RecordCount AND ListFindNoCase(ValueList(qStatuses.status),"Passed")>
+		<cfoutput query="qStatuses">
+			<cfset sValues[status] = NumRules>
+			<cfset total = total + NumRules>
+		</cfoutput>
+		<cfif total>
+			<cfset result = Round((Val(sValues["Passed"]) / total) * 100)>
+		</cfif>
+	</cfif>
+	
+	<cfreturn result>
 </cffunction>
 
 <cffunction name="getStatuses" access="public" returntype="query" output="no">
