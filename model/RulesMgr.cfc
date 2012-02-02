@@ -315,8 +315,6 @@
 				type="max"
 				entity="Execution"
 				field="DateTested"
-				join-field-local="RuleID"
-				join-field-remote="RuleID"
 			/>
 		</field>
 		<field name="Status" Label="Status" type="relation">
@@ -324,8 +322,6 @@
 				type="label"
 				entity="Execution"
 				field="Status"
-				join-field-local="RuleID"
-				join-field-remote="RuleID"
 				sort-field="DateTested"
 				sort-dir="DESC"
 			/>
