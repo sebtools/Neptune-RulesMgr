@@ -67,6 +67,7 @@
 		<!--- Update rule if not all fields match --->
 		<cfif qFindRule.RecordCount EQ 0>
 			<cfset arguments.RuleID = qFindRule.RuleID>
+			<cfset arguments.truncate = true>
 			<cfset result = saveRule(argumentCollection=arguments)>
 		</cfif>
 	</cfif>

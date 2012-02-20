@@ -18,7 +18,7 @@
 
 
 <div style="clear:right"></div>
-<cf_sebTable>
+<cf_sebTable isAddable="false" isEditable="false" isDeletable="false">
 	<cf_sebColumn dbfield="ComponentID">
 	<cf_sebColumn dbfield="RuleName">
 	<cf_sebColumn dbfield="Status" link="execution-list.cfm?rule=">
