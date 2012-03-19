@@ -11,7 +11,4 @@
 </program>
 </cffunction>
 
-<cffunction name="links" access="public" returntype="string" output="yes">
-</cffunction>
-
 </cfcomponent>

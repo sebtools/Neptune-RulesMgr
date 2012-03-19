@@ -12,6 +12,8 @@
 	
 	<!--- If more than one component exists with any combination of these criteria, then we have a problem --->
 	<cfif qFindComponent.RecordCount GT 1>
+		<cfdump var="#qFindComponent#">
+		<cfdump var="#Arguments#"><cfabort>
 		<cfthrow message="Conflicting Test Components (ComponentName=#arguments.ComponentName#,ComponentPath=#arguments.ComponentPath#,FilePath=#arguments.FilePath#)" type="RulesMgr">
 	</cfif>
 	
@@ -56,6 +58,13 @@
 	
 	<cfif qFindComponent.RecordCount GT 1>
 		<cfif NOT StructKeyExists(arguments,"retry")>
+			
+			<cfoutput query="qFindComponent">
+				<cfif NOT FileExists(qFindComponent.FilePath[CurrentRow])>
+					<cfset removeComponent(ComponentID)>
+				</cfif>
+			</cfoutput>
+			
 			<cfset sData = StructNew()>
 			<cfset sData["NumRules"] = 0>
 			<cfset sData["ComponentPath"] = arguments.ComponentPath>
