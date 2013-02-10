@@ -6,7 +6,7 @@
 	<cf_sebField type="submit" label="Run Test">
 </cf_sebForm>
 
-<cfif Len(qExecution.wData)>
+<cfif Len(qExecution.wData) and isWddx(qExecution.wData)>
 	<cfdump var="#qExecution.wData#">
 <cfelseif Len(qExecution.dData)>
 	<cfoutput>#qExecution.dData#</cfoutput>
