@@ -30,13 +30,22 @@
 	<cfset var qFiles = variables.FileMgr.directoryList(directory=variables.RootPath,filter="Test*.cfc",recurse=true)>
 	<cfset var qUIFiles = variables.FileMgr.directoryList(directory=variables.RootPath,filter="UITest*.cfc",recurse=true)>
 	<cfset var qResults = QueryNew("Name,Directory,DateLastModified,Size,Mode,Attributes,FilePath,CompPath,DisplayName")>
+	<cfset var oTestComp = 0>
 	<cfset var sTestComp = 0>
 	<cfset var path = "">
 	
 	<cfoutput query="qFiles">
 		<cfset path = getCompPath(Directory & Name)>
 		
-		<cfset sTestComp = GetMetaData(CreateObject("component",path))>
+		<cfset oTestComp = CreateObject("component",path)>
+		<cftry>
+			<cfset sTestComp = GetMetaData(oTestComp)>
+		<cfcatch>
+			<cfdump var="#CFDUMP#">
+			<cfdump var="#oTestComp#">
+			<cfabort>
+		</cfcatch>
+		</cftry>
 		
 		<cfif StructKeyExists(sTestComp,"DisplayName")>
 			<cfset QueryAddRow(qResults)>
@@ -256,19 +265,28 @@
 	
 </cffunction>
 
-<cffunction name="reloadMethods" access="private" returntype="void" output="false" hint="">
+<cffunction name="reloadMethods" access="public" returntype="void" output="false" hint="">
 	<cfargument name="ComponentID" type="numeric" required="true">
-	<cfargument name="FilePath" type="string" required="true">
+	<cfargument name="FilePath" type="string" required="false">
+	<cfargument name="WithRemove" type="boolean" default="false">
 	
-	<cfset var qTests  = getTests(arguments.FilePath)>
+	<cfset var qTests = 0>
+	<cfset var qComponent = 0>
 	<cfset var qRules = 0>
+	
+	<cfif NOT StructKeyExists(Arguments,"FilePath")>
+		<cfset qComponent = variables.Components.getComponent(ComponentID=Arguments.ComponentID,fieldlist="FilePath")>
+		<cfset arguments.FilePath = qComponent.FilePath>
+	</cfif>
+	
+	<cfset qTests  = getTests(arguments.FilePath)>
 	
 	<cfif variables.DataMgr.getDatabase() NEQ "Sim">
 		<!--- Delete non-existent rules --->
 		<cfset qRules = variables.Rules.getRules(ComponentID=arguments.ComponentID)>
 	
 		<cfloop query="qRules">
-			<cfif NOT ListFindNoCase(ValueList(qTests.Method),Method)>
+			<cfif Arguments.WithRemove OR NOT ListFindNoCase(ValueList(qTests.Method),Method)>
 				<cfset variables.Rules.removeRule(RuleID)>
 			</cfif>
 		</cfloop>

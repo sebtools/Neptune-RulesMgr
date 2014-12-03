@@ -12,8 +12,6 @@
 	
 	<!--- If more than one component exists with any combination of these criteria, then we have a problem --->
 	<cfif qFindComponent.RecordCount GT 1>
-		<cfdump var="#qFindComponent#">
-		<cfdump var="#Arguments#"><cfabort>
 		<cfthrow message="Conflicting Test Components (ComponentName=#arguments.ComponentName#,ComponentPath=#arguments.ComponentPath#,FilePath=#arguments.FilePath#)" type="RulesMgr">
 	</cfif>
 	

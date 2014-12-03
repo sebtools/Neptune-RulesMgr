@@ -16,6 +16,18 @@
 	<cf_sebField type="submit" label="Search">
 </cf_sebForm>
 
+<cfif Val(URL.component)>
+	<cf_sebForm CFC_Component="#Application.RulesMgr#" CFC_Method="reloadMethods">
+		<cf_sebField type="hidden" name="ComponentID" setValue="#URL.component#">
+		<cf_sebField type="yesno" name="WithRemove" label="Remove All Tests First?" defaultValue="false" hint="not recommended">
+		<cf_sebField type="submit" label="Reload Test Methods">
+	</cf_sebForm>
+<cfelse>
+	<cf_sebForm CFC_Component="#Application.RulesMgr#" CFC_Method="reloadTestComponents" skin="plain">
+		<cf_sebField type="submit" label="Reload All Test Components">
+	</cf_sebForm>
+</cfif>
+
 
 <div style="clear:right"></div>
 <cf_sebTable isAddable="false" isEditable="false" isDeletable="false">
