@@ -5,10 +5,36 @@
 <cffunction name="init" access="public" returntype="any" output="no" hint="I initialize and return this object.">
 	<cfargument name="Manager" type="any" required="yes">
 	<cfargument name="RootPath" type="string" required="yes">
+	<cfargument name="doTestSebTools" type="boolean" required="no">
 	
+	<cfset var sManager = 0>
+	<cfset var SebToolsPath = "">
+
 	<cfset initInternal(argumentCollection=arguments)>
-	
-	<cfset reload()>
+
+	<cfset Variables.Paths = Variables.RootPath>
+
+	<cfif Arguments.doTestSebTools IS true>
+		<cfif StructKeyExists(Variables.Manager,"getThisTemplatePath")>
+			<cfset SebToolsPath = Variables.Manager.getThisTemplatePath()>
+		<cfelse>
+			<cftry>
+				<cfset sManager = getMetaData(Variables.Manager)>
+				<cfif StructKeyExists(sManager,"Path")>
+					<cfset SebToolsPath = sManager.Path>
+				</cfif>
+			<cfcatch>
+			</cfcatch>
+			</cftry>
+		</cfif>
+		<cfif Len(SebToolsPath)>
+			<cfset SebToolsPath = getDirectoryFromPath(SebToolsPath)>
+			<cfset Variables.Paths = ListAppend(Variables.Paths,SebToolsPath)>
+			<cfset Variables.CustomTagPath = ReplaceNoCase(SebToolsPath,"com#Variables.Manager.FileMgr.getDirDelim()#sebtools#Variables.Manager.FileMgr.getDirDelim()#","")>
+		</cfif>
+	</cfif>
+
+	<!--- <cfset reload()> --->
 	
 	<cfreturn This>
 </cffunction>
@@ -17,6 +43,10 @@
 	<cfargument name="CompFilePath" type="string" required="true">
 	
 	<cfset var result = ReplaceNoCase(arguments.CompFilePath,variables.RootPath,"")>
+
+	<cfif StructKeyExists(Variables,"CustomTagPath")>
+		<cfset result = ReplaceNoCase(result,variables.CustomTagPath,"")>
+	</cfif>
 	
 	<cfset result = reverse(ListRest(reverse(result),"."))>
 	<cfset result = ListChangeDelims(result,".","/")>
@@ -26,18 +56,19 @@
 </cffunction>
 
 <cffunction name="getTestComponents" access="public" returntype="query" output="false">
+	<cfargument name="Path" type="string" required="yes">
 	
-	<cfset var qFiles = variables.FileMgr.directoryList(directory=variables.RootPath,filter="Test*.cfc",recurse=true)>
-	<cfset var qUIFiles = variables.FileMgr.directoryList(directory=variables.RootPath,filter="UITest*.cfc",recurse=true)>
+	<cfset var qFiles = variables.FileMgr.directoryList(directory=Arguments.Path,filter="Test*.cfc",recurse=true)>
+	<cfset var qUIFiles = variables.FileMgr.directoryList(directory=Arguments.Path,filter="UITest*.cfc",recurse=true)>
 	<cfset var qResults = QueryNew("Name,Directory,DateLastModified,Size,Mode,Attributes,FilePath,CompPath,DisplayName")>
 	<cfset var oTestComp = 0>
 	<cfset var sTestComp = 0>
-	<cfset var path = "">
+	<cfset var mypath = "">
 	
 	<cfoutput query="qFiles">
-		<cfset path = getCompPath(Directory & Name)>
+		<cfset mypath = getCompPath(Directory & Name)>
 		
-		<cfset oTestComp = CreateObject("component",path)>
+		<cfset oTestComp = CreateObject("component",mypath)>
 		<cftry>
 			<cfset sTestComp = GetMetaData(oTestComp)>
 		<cfcatch>
@@ -56,14 +87,14 @@
 			<cfset QuerySetCell(qResults,"Mode",Mode)>
 			<cfset QuerySetCell(qResults,"Attributes",Attributes)>
 			<cfset QuerySetCell(qResults,"FilePath",Directory & Name)>
-			<cfset QuerySetCell(qResults,"CompPath",path)>
+			<cfset QuerySetCell(qResults,"CompPath",mypath)>
 			<cfset QuerySetCell(qResults,"DisplayName",sTestComp.DisplayName)>
 		</cfif>
 	</cfoutput>
 	
 	<cfoutput query="qUIFiles">
-		<cfset path = getCompPath(Directory & Name)>
-		<cfset sTestComp = GetMetaData(CreateObject("component",path))>
+		<cfset mypath = getCompPath(Directory & Name)>
+		<cfset sTestComp = GetMetaData(CreateObject("component",mypath))>
 		
 		<cfif StructKeyExists(sTestComp,"DisplayName")>
 			<cfset QueryAddRow(qResults)>
@@ -74,7 +105,7 @@
 			<cfset QuerySetCell(qResults,"Mode",Mode)>
 			<cfset QuerySetCell(qResults,"Attributes",Attributes)>
 			<cfset QuerySetCell(qResults,"FilePath",Directory & Name)>
-			<cfset QuerySetCell(qResults,"CompPath",path)>
+			<cfset QuerySetCell(qResults,"CompPath",mypath)>
 			<cfset QuerySetCell(qResults,"DisplayName",sTestComp.DisplayName)>
 		</cfif>
 	</cfoutput>
@@ -83,8 +114,13 @@
 </cffunction>
 
 <cffunction name="reload" access="public" returntype="void" output="false" hint="">
-	
-	<cfset reloadTestComponents()>
+	<cfargument name="Paths" type="string" default="#variables.Paths#">
+
+	<cfset var path = "">
+
+	<cfloop index="path" list="#Arguments.Paths#">
+		<cfset reloadTestComponents(path)>
+	</cfloop>
 	
 </cffunction>
 
@@ -243,8 +279,9 @@
 </cffunction>
 
 <cffunction name="reloadTestComponents" access="private" returntype="void" output="false" hint="">
-	
-	<cfset var qTestComponents = getTestComponents()>
+	<cfargument name="Path" type="string" required="true">
+
+	<cfset var qTestComponents = getTestComponents(Arguments.Path)>
 	<cfset var compid = 0>
 	<cfset var qComponents = 0>
 	

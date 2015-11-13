@@ -23,7 +23,7 @@
 		<cf_sebField type="submit" label="Reload Test Methods">
 	</cf_sebForm>
 <cfelse>
-	<cf_sebForm CFC_Component="#Application.RulesMgr#" CFC_Method="reloadTestComponents" skin="plain">
+	<cf_sebForm CFC_Component="#Application.RulesMgr#" CFC_Method="reload" skin="plain">
 		<cf_sebField type="submit" label="Reload All Test Components">
 	</cf_sebForm>
 </cfif>
